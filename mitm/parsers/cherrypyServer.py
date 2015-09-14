@@ -11,14 +11,8 @@ from cherrypy.lib.httputil import parse_query_string
 import random
 import string
 
-mailIn = Queue.Queue()
-mailOut = Queue.Queue()
-password = Queue.Queue()
-errors = Queue.Queue()
-
-passwordOut = Queue.Queue()
-recipientOut = Queue.Queue()
-mailDataOut = Queue.Queue()
+available_queues = ["mailIn", "mailOut", "password", "errors", "passwordOut", "recipientOut", "mailDataOut"]
+queues = {q: Queue.Queue() for q in available_queues}
 
 def error_page_404(status, message, traceback, version):
     return "404 Error!"
@@ -38,40 +32,12 @@ class HomeController():
         msgOut = ""
         query = parse_query_string(cherrypy.request.query_string)
         queue = str(query["queue"]) 
-
-        if(queue== "mailIn"):
-            mailIn.put(msg)
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "put"
-            Dict_Message["queue"] = "mailIn"
-            Dict_Message["size"] = str(mailIn.qsize())
-            msgOut = json.dumps(Dict_Message)
-        elif(queue== "mailOut"):
-            mailOut.put(msg)
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "put"
-            Dict_Message["queue"] = "mailOut"
-            Dict_Message["size"] = str(mailOut.qsize())
-            msgOut = json.dumps(Dict_Message)
-        elif(queue== "password"):
-            password.put(msg)
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "put"
-            Dict_Message["queue"] = "password"
-            Dict_Message["size"] = str(password.qsize())
-            msgOut = json.dumps(Dict_Message)
+        
+        if queue in available_queues:
+            msgOut = {"status" : "OK", "method" : "put", "queue" : queue, "size" : queues[queue].qsize()}
         else:
-            Dict_Message = dict()
-            Dict_Message["status"] = "ERROR"
-            Dict_Message["method"] = "put"
-            Dict_Message["msg"] = "Cola no existente."
-            Dict_Message["code"] = "1"
-            msgOut = json.dumps(Dict_Message)
-            eMsg = msgOut
-            errorMsg.put(eMsg)
+            msgOut = {"status" : "OK", "method" : "put", "queue" : "errors", "size" : queues["errors"].qsize()}
+
         #stomp = Client("http://activemq-mitmactivemq.rhcloud.com", 61613)
         #stomp.connect("producer", "pass")
         #stomp.put(json.dumps(Dict_Message), destination="/queue/test",conf={'Test':'Test123'})
@@ -83,42 +49,16 @@ class HomeController():
     @cherrypy.tools.json_in()
     # Método para consultar cantidad de mensajes en colas de entrada
     def qSize(self, **kwargs):
-        msg= ""
+        msgOut= ""
         query = parse_query_string(cherrypy.request.query_string)
-        queue = str(query["queue"]) 
+        queue = str(query["queue"])
 
-
-        if(queue== "mailIn"):
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "qSize"
-            Dict_Message["queue"] = "mailIn"
-            Dict_Message["size"] = str(mailIn.qsize())
-            msg = json.dumps(Dict_Message)
-        elif(queue== "mailOut"):
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "qSize"
-            Dict_Message["queue"] = "mailOut"
-            Dict_Message["size"] = str(mailOut.qsize())
-            msg = json.dumps(Dict_Message)
-        elif(queue== "password"):
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "qSize"
-            Dict_Message["queue"] = "password"
-            Dict_Message["size"] = str(password.qsize())
-            msg = json.dumps(Dict_Message)
+        if queue in available_queues:
+            msgOut = {"status" : "OK", "method" : "put", "queue" : queue, "size" : queues[queue].qsize()}
         else:
-            Dict_Message = dict()
-            Dict_Message["status"] = "ERROR"
-            Dict_Message["method"] = "qSize"
-            Dict_Message["msg"] = "Cola no existente."
-            Dict_Message["code"] = "1"
-            msg = json.dumps(Dict_Message)
-            eMsg = msg
-            errorMsg.put(eMsg)
-        return msg
+            msgOut = {"status" : "OK", "method" : "put", "queue" : "errors", "size" : queues["errors"].qsize()}
+            
+        return msgOut
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -126,72 +66,18 @@ class HomeController():
     # Método para obtener mensajes de colas de entrada.
     def get(self, **kwargs):
         query = parse_query_string(cherrypy.request.query_string)
-        msg = ""
+        msgOut = ""
         #queue = kwargs["queue"]
         queue = str(query["queue"]) 
-
-        if(queue== "mailIn"):
-            if(mailIn.qsize() > 0):
-                Dict_Message = dict()
-                Dict_Message["status"] = "OK"
-                Dict_Message["method"] = "get"
-                Dict_Message["queue"] = "mailIn"
-                Dict_Message["size"] = str(mailIn.qsize())
-                Dict_Message["element"] = mailIn.get()
-                msg = json.dumps(Dict_Message)
+        
+        if queue in available_queues:
+            if queues[queue].qsize() > 0:
+                msgOut = {"status" : "OK", "method" : "get", "queue" : queue, "size" : queues[queue].qsize(), "element" : queues[queue].get()}
             else:
-                Dict_Message = dict()
-                Dict_Message["status"] = "OK"
-                Dict_Message["method"] = "get"
-                Dict_Message["queue"] = "mailIn"
-                Dict_Message["size"] = "0"
-                Dict_Message["element"] = ""
-                msg = json.dumps(Dict_Message)
-        elif(queue== "mailOut"):
-            if(mailOut.qsize() > 0):
-                Dict_Message = dict()
-                Dict_Message["status"] = "OK"
-                Dict_Message["method"] = "get"
-                Dict_Message["queue"] = "mailIn"
-                Dict_Message["size"] = str(mailOut.qsize())
-                Dict_Message["element"] = mailOut.get()
-                msg = json.dumps(Dict_Message)
-            else:
-                Dict_Message = dict()
-                Dict_Message["status"] = "OK"
-                Dict_Message["method"] = "get"
-                Dict_Message["queue"] = "mailIn"
-                Dict_Message["size"] = "0"
-                Dict_Message["element"] = ""
-                msg = json.dumps(Dict_Message)
-
-        elif(queue== "password"):
-            if(mailIn.qsize() > 0):
-                Dict_Message = dict()
-                Dict_Message["status"] = "OK"
-                Dict_Message["method"] = "get"
-                Dict_Message["queue"] = "password"
-                Dict_Message["size"] = str(mailOut.qsize())
-                Dict_Message["element"] = mailOut.get()
-                msg = json.dumps(Dict_Message)
-            else:
-                Dict_Message = dict()
-                Dict_Message["queue"] = "mailOut"
-                Dict_Message["method"] = "get"
-                Dict_Message["size"] = "0"
-                Dict_Message["element"] = ""
-                msg = json.dumps(Dict_Message)
-
+                msgOut = {"status" : "OK", "method" : "get", "queue" : queue, "size" : queues[queue].qsize()}
         else:
-            Dict_Message = dict()
-            Dict_Message["status"] = "ERROR"
-            Dict_Message["method"] = "get"
-            Dict_Message["queue"] = queue
-            Dict_Message["msg"] = "Cola no existente."
-            Dict_Message["code"] = "1"
-            msg = json.dumps(Dict_Message)
-            eMsg = msg
-            errorMsg.put(eMsg)
+            msgOut = {"status" : "ERROR", "method" : "get", "msg" : "Cola no existente."}
+            
         return msg
         #return queue
 
