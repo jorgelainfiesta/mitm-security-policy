@@ -3,17 +3,19 @@
 
 from libmproxy.protocol.http import decoded
 from libmproxy.flow import FlowWriter
-from urllib import unquote
-from urllib import quote
+#from urllib import unquote
+#from urllib import quote
 from datetime import datetime
+import re
 
 import requests
-import json
+#import json
 import sys  
 
 def start(context, argv):
     if len(argv) != 2:
         raise ValueError('Usage: -s "mitm_stream.oy endpoint"')
+    #Set system's encoding UTF-8
     context.endpoint = argv[1]
     reload(sys)  
     sys.setdefaultencoding('utf8')
@@ -65,22 +67,20 @@ def response(context, flow):
 This method receives an HTTPRequest dict and a HTTPResponse dict, reads its headers and redirects it to the corresponding processor. 
 '''
 def redirect(request, response, endpoint):
-    #Signatures to recognize messages
-    out_signature = [8, 237, 156, 142, 161, 242, 41, 35, 8, 0, 16, 204, 40, 24, 200, 1, 40, 0, 48, 1, 56, 3, 64, 1, 72, 1, 80, 1, 88, 0, 96, 5, 112, 1, 120, 1, 128, 1, 1, 36, 59, 11, 8]
+    #If it's from Google
+    if "google" in request['host']:
+        plain_content = request['content'].decode('utf8', "ignore")
+        #Count emails in the payload
+        emails = get_emails(plain_content)
+        emails_count = sum(1 for _ in emails)
+        #If it contains emails, we can assume it's an email: the parser will take care of everything else
+        if emails_count > 0:
+            response['content'] =plain_content
+            r = requests.post(endpoint+"/put?queue=mailOut", json=response)
+
+def get_emails(content):
+    email_regex = re.compile(("([a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`"
+                        "{|}~-]+)*(@|\sat\s)(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(\.|"
+                        "\sdot\s))+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"))
     
-    if check_signature(request['content'], out_signature):
-        response['content'] = request['content'].decode('utf8', "ignore")
-        r = requests.post(endpoint+"/mail-out", data=json.dumps(response))
-        print r.text
-        
-def check_signature(sequence, signature, tolerance=2):
-    if len(sequence) < len(signature):
-        return False
-    
-    failed = 0
-    for i in xrange(len(signature)):
-        if ord(sequence[i]) != signature[i]:
-            failed += 1
-        if failed > tolerance:
-            break
-    return failed <= tolerance
+    return (email[0] for email in re.findall(email_regex, content) if not email[0].startswith('//'))
