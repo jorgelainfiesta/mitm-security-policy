@@ -19,13 +19,13 @@ def error_page_404(status, message, traceback, version):
 
 class HomeController():
     #______________________________________________________________
-    # Métodos de entrada:
+    # Metodos de entrada:
     #______________________________________________________________
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
-    # Método para recibir mensajes de correo entrantes y contraseñas desde mitm-proxy
+    # Metodo para recibir mensajes de correo entrantes y contrasenias desde mitm-proxy
     def put(self, **kwargs):
         input_json = cherrypy.request.json
         msg = input_json
@@ -34,6 +34,7 @@ class HomeController():
         queue = str(query["queue"]) 
         
         if queue in available_queues:
+            queues[queue].put(msg)
             msgOut = {"status" : "OK", "method" : "put", "queue" : queue, "size" : queues[queue].qsize()}
         else:
             msgOut = {"status" : "OK", "method" : "put", "queue" : "errors", "size" : queues["errors"].qsize()}
@@ -47,23 +48,23 @@ class HomeController():
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
-    # Método para consultar cantidad de mensajes en colas de entrada
+    # Metodo para consultar cantidad de mensajes en colas de entrada
     def qSize(self, **kwargs):
         msgOut= ""
         query = parse_query_string(cherrypy.request.query_string)
         queue = str(query["queue"])
 
         if queue in available_queues:
-            msgOut = {"status" : "OK", "method" : "put", "queue" : queue, "size" : queues[queue].qsize()}
+            msgOut = {"status" : "OK", "method" : "qSize", "queue" : queue, "size" : queues[queue].qsize()}
         else:
-            msgOut = {"status" : "OK", "method" : "put", "queue" : "errors", "size" : queues["errors"].qsize()}
+            msgOut = {"status" : "OK", "method" : "qSize", "queue" : "errors", "size" : queues["errors"].qsize()}
             
         return msgOut
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
-    # Método para obtener mensajes de colas de entrada.
+    # Metodo para obtener mensajes de colas de entrada.
     def get(self, **kwargs):
         query = parse_query_string(cherrypy.request.query_string)
         msgOut = ""
@@ -78,17 +79,17 @@ class HomeController():
         else:
             msgOut = {"status" : "ERROR", "method" : "get", "msg" : "Cola no existente."}
             
-        return msg
+        return msgOut
         #return queue
 
     #______________________________________________________________
-    # Métodos de salida
+    # Metodos de salida
     #______________________________________________________________
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
-    # Método para obtención de contraseñas obtenidas.
+    # Metodo para obtencion de contrasenias obtenidas.
     def getPasswordItem(self, **kwargs):
         rnd = random.randint(0,3)
         size = passwordOut.qsize()
@@ -112,7 +113,7 @@ class HomeController():
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
-    #Método para obtención de destinatarios
+    #Metodo para obtencion de destinatarios
     def getRecipientItem(self, **kwargs):
         rnd = random.randint(0,3)
         size = recipientOut.qsize()
@@ -139,7 +140,7 @@ class HomeController():
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
-    #Método para obtención de contenidos de correos electrónicos.
+    #Metodo para obtencion de contenidos de correos electronicos.
     def getMailBodyItem(self, **kwargs):
         rnd = random.randint(0,3)
         size = mailDataOut.qsize()
