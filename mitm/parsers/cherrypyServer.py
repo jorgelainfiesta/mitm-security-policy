@@ -11,7 +11,7 @@ from cherrypy.lib.httputil import parse_query_string
 import random
 import string
 
-available_queues = ["mailIn", "mailOut", "password", "errors", "passwordOut", "recipientOut", "mailDataOut"]
+available_queues = ["mailIn", "mailOut", "password", "errors", "passwordOut", "recipientOut", "mailDataOut", "subjectOut"]
 queues = {q: Queue.Queue() for q in available_queues}
 
 def error_page_404(status, message, traceback, version):
@@ -37,8 +37,7 @@ class HomeController():
             queues[queue].put(msg)
             msgOut = {"status" : "OK", "method" : "put", "queue" : queue, "size" : queues[queue].qsize()}
         else:
-            msgOut = {"status" : "OK", "method" : "put", "queue" : "errors", "size" : queues["errors"].qsize()}
-
+            msgOut = {"status" : "ERROR", "method" : "put", "msg" : "Cola no existente."}
         #stomp = Client("http://activemq-mitmactivemq.rhcloud.com", 61613)
         #stomp.connect("producer", "pass")
         #stomp.put(json.dumps(Dict_Message), destination="/queue/test",conf={'Test':'Test123'})
@@ -57,8 +56,7 @@ class HomeController():
         if queue in available_queues:
             msgOut = {"status" : "OK", "method" : "qSize", "queue" : queue, "size" : queues[queue].qsize()}
         else:
-            msgOut = {"status" : "OK", "method" : "qSize", "queue" : "errors", "size" : queues["errors"].qsize()}
-            
+            msgOut = {"status" : "ERROR", "method" : "qSize", "msg" : "Cola no existente."}
         return msgOut
 
     @cherrypy.expose
@@ -75,7 +73,7 @@ class HomeController():
             if queues[queue].qsize() > 0:
                 msgOut = {"status" : "OK", "method" : "get", "queue" : queue, "size" : queues[queue].qsize(), "element" : queues[queue].get()}
             else:
-                msgOut = {"status" : "OK", "method" : "get", "queue" : queue, "size" : queues[queue].qsize()}
+                msgOut = {"status" : "OK", "method" : "get", "queue" : queue, "size" : 0}
         else:
             msgOut = {"status" : "ERROR", "method" : "get", "msg" : "Cola no existente."}
             
@@ -91,22 +89,26 @@ class HomeController():
     @cherrypy.tools.json_in()
     # Metodo para obtencion de contrasenias obtenidas.
     def getPasswordItem(self, **kwargs):
-        rnd = random.randint(0,3)
         size = passwordOut.qsize()
-        size = rnd
+
         if(size > 0):
-            Dict_Message = dict()
-            rnd = random.randint(1,25)
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "getPasswordItem"
-            Dict_Message["password"] = ''.join(random.sample(string.hexdigits, int(rnd)))
-            msg = json.dumps(Dict_Message)
+            msg = passwordOut.get()
+            #msg = json.dumps(passwordData)
         else:
-            Dict_Message = dict()
-            Dict_Message["method"] = "getPasswordItem"
-            Dict_Message["msg"] = "0 elementos sin procesar."
-            Dict_Message["code"] = "2"
-            msg = json.dumps(Dict_Message)
+            # Temporal, para pruebas: BEGIN Borrar
+            rnd = random.randint(0,3)
+            size = rnd
+            if(size > 0):
+                rnd = random.randint(1,25)
+                msg = {"status" : "OK",  "method" : "getPasswordItem", "password" : ''.join(random.sample(string.hexdigits, int(rnd)))}
+                #msg = json.dumps(msg)
+            else:
+                msg = {"status" : "0size","method" : "getPasswordItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+                #msg = json.dumps(msg)
+            # Temporal, para pruebas: END Borrar
+        #else:
+        #    msg = {"status" : "0size","method" : "getPasswordItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+
 
         return msg
 
@@ -115,26 +117,30 @@ class HomeController():
     @cherrypy.tools.json_in()
     #Metodo para obtencion de destinatarios
     def getRecipientItem(self, **kwargs):
-        rnd = random.randint(0,3)
         size = recipientOut.qsize()
-        size = rnd
+
         if(size > 0):
-            Dict_Message = dict()
-            rnd = random.randint(1,10)
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "getRecipientItem"
-            nested_list = dict()
-            for i in range(1, rnd+1):
-                recipient = "recipient" + str(i)
-                nested_list[recipient] = "" + ''.join(random.sample(string.hexdigits, int(8))) + "@gmail.com"
-            Dict_Message["recipientList"] = nested_list
-            msg = json.dumps(Dict_Message)
+            msg = recipientOut.get()
+            #msg = json.dumps(passwordData)
         else:
-            Dict_Message = dict()
-            Dict_Message["method"] = "getRecipientItem"
-            Dict_Message["msg"] = "0 elementos sin procesar."
-            Dict_Message["code"] = "2"
-            msg = json.dumps(Dict_Message)
+            # Temporal, para pruebas: BEGIN Borrar
+            rnd = random.randint(0,3)
+            size = rnd
+            if(size > 0):
+                rnd = random.randint(1,10)
+                nested_list = dict()
+                for i in range(1, rnd+1):
+                    recipient = "recipient" + str(i)
+                    nested_list[recipient] = "" + ''.join(random.sample(string.hexdigits, int(8))) + "@gmail.com"
+                msg = {"status" : "OK",  "method" : "getRecipientItem", "recipientList" : nested_list}
+                #msg = json.dumps(msg)
+            else:
+                msg = {"status" : "0size","method" : "getRecipientItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+                #msg = json.dumps(msg)
+            # Temporal, para pruebas: END Borrar
+        #else:
+        #    msg = {"status" : "0size","method" : "getRecipientItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+
         return msg
 
     @cherrypy.expose
@@ -142,23 +148,53 @@ class HomeController():
     @cherrypy.tools.json_in()
     #Metodo para obtencion de contenidos de correos electronicos.
     def getMailBodyItem(self, **kwargs):
-        rnd = random.randint(0,3)
         size = mailDataOut.qsize()
-        size = rnd
+
         if(size > 0):
-            Dict_Message = dict()
-            Dict_Message["status"] = "OK"
-            Dict_Message["method"] = "getMailBodyItem"
-            Dict_Message["body"] = "Vuelvo a mi habitacion, y sintiendo toda mi alma abrasada, no tarde en oir de nuevo un golpe, un poco mas fuerte que el primero. \"Seguramente - me dije -, hay algo en las persianas de la ventana; veamos que es y exploremos este misterio: es el viento, y nada mas\". Entonces empuje la persiana y, con un tumultuoso batir de alas, entro majestuoso un cuervo digno de las pasadas epocas. El animal no efectuo la menor reverencia, no se paro, no vacilo un minuto; pero con el aire de un Lord o de una Lady, se coloco por encima de la puerta de mi habitacion; posandose sobre un busto de Palas, precisamente encima de la puerta de mi alcoba; se poso, se instalo y nada mas.Entonces, este pajaro de ebano, por la gravedad de su continente, y por la severidad de su fisonomia, indujo a mi triste imaginacion a sonreir; \"Aunque tu cabeza - le dije - no tenga plumero, ni cimera, seguramente no eres un cobarde, lugubre y viejo cuervo, viajero salido de las riberas de la noche. Dime cual es tu nombre seniorial en las riberas de la Noche plutonica\". El cuervo exclamo: \"Nunca mas\"."
-            msg = json.dumps(Dict_Message)
+            msg = mailDataOut.get()
+            #msg = json.dumps(passwordData)
         else:
-            Dict_Message = dict()
-            Dict_Message["method"] = "getMailBodyItem"
-            Dict_Message["msg"] = "0 elementos sin procesar."
-            Dict_Message["code"] = "2"
-            msg = json.dumps(Dict_Message)
+            # Temporal, para pruebas: BEGIN Borrar
+            rnd = random.randint(0,3)
+            size = rnd
+            if(size > 0):
+                msg = {"status" : "OK",  "method" : "getMailBodyItem", "body" : "Vuelvo a mi habitacion, y sintiendo toda mi alma abrasada, no tarde en oir de nuevo un golpe, un poco mas fuerte que el primero. \"Seguramente - me dije -, hay algo en las persianas de la ventana; veamos que es y exploremos este misterio: es el viento, y nada mas\". Entonces empuje la persiana y, con un tumultuoso batir de alas, entro majestuoso un cuervo digno de las pasadas epocas. El animal no efectuo la menor reverencia, no se paro, no vacilo un minuto; pero con el aire de un Lord o de una Lady, se coloco por encima de la puerta de mi habitacion; posandose sobre un busto de Palas, precisamente encima de la puerta de mi alcoba; se poso, se instalo y nada mas.Entonces, este pajaro de ebano, por la gravedad de su continente, y por la severidad de su fisonomia, indujo a mi triste imaginacion a sonreir; \"Aunque tu cabeza - le dije - no tenga plumero, ni cimera, seguramente no eres un cobarde, lugubre y viejo cuervo, viajero salido de las riberas de la noche. Dime cual es tu nombre seniorial en las riberas de la Noche plutonica\". El cuervo exclamo: \"Nunca mas\"."}
+                #msg = json.dumps(msg)
+            else:
+                msg = {"status" : "0size","method" : "getMailBodyItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+                #msg = json.dumps(msg)
+            # Temporal, para pruebas: END Borrar
+        #else:
+        #    msg = {"status" : "0size","method" : "getMailBodyItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+
         return msg
-        
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    @cherrypy.tools.json_in()
+    #Metodo para obtencion de asunto de correos electronicos.
+    def getSubjectItem(self, **kwargs):
+        size = subjectOut.qsize()
+
+        if(size > 0):
+            msg = subjectOut.get()
+            #msg = json.dumps(passwordData)
+        else:
+            # Temporal, para pruebas: BEGIN Borrar
+            rnd = random.randint(0,3)
+            size = rnd
+            if(size > 0):
+                msg = {"status" : "OK",  "method" : "getSubjectItem", "subject" : "Prueba"}
+                #msg = json.dumps(msg)
+            else:
+                msg = {"status" : "0size","method" : "getSubjectItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+                #msg = json.dumps(msg)
+            # Temporal, para pruebas: END Borrar
+        #else:
+        #    msg = {"status" : "0size","method" : "getSubjectItem", "msg" : "0 elementos sin procesar.", "code" : "2"}
+
+        return msg
+
 def start_server():
 
     cherrypy.tree.mount(HomeController(), '/')
