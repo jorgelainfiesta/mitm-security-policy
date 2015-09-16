@@ -35,7 +35,7 @@ def translatePassword(content):
 
     return json_password_data
 
-def translate(url_base='https://localhost:9090/'):
+def translate(url_base='http://localhost:9090/'):
     print "Iniciando servicio de traduccion de mensajes EndPoint mitmProxy - Parsers - Analizador..."
 
     while(True):
