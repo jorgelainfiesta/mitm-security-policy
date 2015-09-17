@@ -91,7 +91,7 @@ class HomeController():
     @cherrypy.tools.json_in()
     # Metodo para obtencion de contrasenias obtenidas.
     def getPasswordItem(self, **kwargs):
-        size = passwordOut.qsize()
+        size = queues["passwordOut"].qsize()
 
         if(size > 0):
             msg = passwordOut.get()
@@ -119,10 +119,10 @@ class HomeController():
     @cherrypy.tools.json_in()
     #Metodo para obtencion de destinatarios
     def getRecipientItem(self, **kwargs):
-        size = recipientOut.qsize()
+        size = queues["recipientOut"].qsize()
 
         if(size > 0):
-            msg = recipientOut.get()
+            msg = queues["recipientOut"].get()
             #msg = json.dumps(passwordData)
         else:
             # Temporal, para pruebas: BEGIN Borrar
@@ -150,10 +150,10 @@ class HomeController():
     @cherrypy.tools.json_in()
     #Metodo para obtencion de contenidos de correos electronicos.
     def getMailBodyItem(self, **kwargs):
-        size = mailDataOut.qsize()
+        size = queues["mailDataOut"].qsize()
 
         if(size > 0):
-            msg = mailDataOut.get()
+            msg = queues["mailDataOut"].get()
             #msg = json.dumps(passwordData)
         else:
             # Temporal, para pruebas: BEGIN Borrar
@@ -176,10 +176,10 @@ class HomeController():
     @cherrypy.tools.json_in()
     #Metodo para obtencion de asunto de correos electronicos.
     def getSubjectItem(self, **kwargs):
-        size = subjectOut.qsize()
+        size = queues["subjectOut"].qsize()
 
         if(size > 0):
-            msg = subjectOut.get()
+            msg = queues["subjectOut"].get()
             #msg = json.dumps(passwordData)
         else:
             # Temporal, para pruebas: BEGIN Borrar
@@ -346,6 +346,23 @@ if __name__ == '__main__':
 #            }
 #    Cuando no hay elementos que procesar
 #            { "method" : "getMailBodyItem"
+#              "msg" : "0 elementos sin procesar."
+#              "code" : "2"
+#            }
+# SUBJECTS
+#import requests
+#r = requests.get('https://mitmendpoint.herokuapp.com/getSubjectItem')
+#r.text
+
+#Posibles respuestas:
+#    Sin errores
+#            { "status" : "OK"
+#              "method" : "getSubjectItem"           
+#              "subject" : "Prueba"
+#            }
+#    Cuando no hay elementos que procesar
+#            { "status" : "0size"
+#              "method" : "getRecipientItem"
 #              "msg" : "0 elementos sin procesar."
 #              "code" : "2"
 #            }

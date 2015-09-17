@@ -48,10 +48,11 @@ def translate(url_base='http://localhost:9090/'):
         r = requests.get(url_base + 'get?queue=mailOut')
         contentData = eval(r.text)
         status = contentData["status"]
-        #print "    text: " + r.text
+        print "..."
         if(status != "ERROR"):
             if(contentData["size"] > 0):
                 try:
+                    print "...Parseando mensaje de correo electronico..."
                     content = contentData["element"]["content"].encode("utf-8")
                     json_sender_data, json_recipients_data, json_subject_data, json_body_data = translateMailData(content)
                     r = requests.post(url_base + 'put?queue=recipientOut', json= json.dumps(json_recipients_data))
@@ -69,10 +70,11 @@ def translate(url_base='http://localhost:9090/'):
         r = requests.get(url_base + 'get?queue=password')
         passwordData = eval(r.text)
         status = passwordData["status"]
-        print "    text: " + r.text
+        print "..."
         if(status != "ERROR"):
             if(passwordData["size"] > 0):
                 try:
+                    print "...Parseando mensaje con contraseña..."
                     password = passwordData["element"]["content"].encode("utf-8")
                     json_password_data = translatePassword(password)
                     r = requests.post(url_base + 'put?queue=passwordOut', json= json.dumps(json_password_data))
