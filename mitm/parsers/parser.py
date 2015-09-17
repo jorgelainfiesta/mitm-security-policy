@@ -1,11 +1,11 @@
 import re
 import json
 
-class Parser:
+class Parser(object):
 
     # Constructor
     def __init__(self):
-        pass
+        return
     # Funcion para extraer informacion de correo electronico:
     # Entrada: content : [string]       Contenido del correo electronico.
     # Salida:  data :                   Elementos del correo.
@@ -15,7 +15,7 @@ class Parser:
     #                 body : [string]        Cuerpo del correo.
     #          error : [json]           Mensaje de error
     def contentParser(self, content):
-  
+        #print content
         # Sender
         senderTemp = content.split('</p>')
         bodyTemp = senderTemp
@@ -32,9 +32,11 @@ class Parser:
 
         # Subject
         headerTemp2 = headerTemp
-        subjectTemp = headerTemp.split('"\x00*\x002')
+        subjectTemp = headerTemp.split('"\u0000*\u00002\u0006')
         subject = subjectTemp[len(subjectTemp)-1]
-        subject = re.sub(r'[^\x20-\x7e]','', subject)
+        subject = re.sub(r'[:\\u0017]','', subject)
+        #print subject
+        #print headerTemp
 
         # Recipients
         recipientsList = re.findall('<.*?>',headerTemp2)
@@ -43,10 +45,10 @@ class Parser:
             element = element.replace("<", "")
             element = element.replace(">", "")
             recipients.append(element)
-	
+
         return sender , recipients, subject, body
 
-    def passwordParser(content):
+    def passwordParser(self, content):
         return "NotImplemented"
 
 #content = '\x08\xed\x9c\x8e)#\x08\x00\x10/\x18\x01(\x000\x018\x03@\x01H\x01P\x01X\x00`\x05p\x01x\x01\x01\x01$;\x0b\x08\x02#\x08\x14\x10\x00\x1a\x1c<nnmorales@gmail.com>\x08\x14\x10\x00\x1a\x1c<jorge.lainfiesta@gmail.com>"\x00*\x002\x06Aaaaaa:\x17<p dir=ltr>Holaaaa</p>\nP\x00X\x00p\x01z\x15neryalecorp@gmail.com$\x0c\x10\x02<K\x08\x01\x10\x01\x18\x00 \x01(\x010\x01:\x05en_US@\x04LP\x02'

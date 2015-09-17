@@ -1,18 +1,21 @@
 import requests
-import parser
+import parsers.parser as prs
 import json
 import sys
 
 #url_base = 'https://mitmendpoint.herokuapp.com/'
 #url_base = 'https://localhost:9090/'
+
 def translateMailData(content):
-    sender , recipients, subject, body = parser.contentParser(content)
+    p = prs.Parser()
+    sender , recipients, subject, body = p.contentParser(content)
 
     sender_data = {"status" : "OK", "method" : "getSenderItem", "sender" : sender}
     json_sender_data = json.dumps(sender_data)
 
     nested_list = dict()
-    for i in (len(recipients) + 1):
+
+    for i in range (0, len(recipients)):
         recipient = "recipient" + str(i)
         nested_list[recipient] = recipients[i]
 
@@ -28,7 +31,8 @@ def translateMailData(content):
     return json_sender_data, json_recipients_data, json_subject_data, json_body_data
 
 def translatePassword(content):
-    password = parser.passwordParser(content)
+    p = prs.Parser()
+    password = p.passwordParser(content)
 
     password_data = {"status" : "OK", "method" : "getPasswordItem", "password" : password}
     json_password_data = json.dumps(password_data)
@@ -44,15 +48,20 @@ def translate(url_base='http://localhost:9090/'):
         r = requests.get(url_base + 'get?queue=mailOut')
         contentData = eval(r.text)
         status = contentData["status"]
-        print "    text: " + r.text
+        #print "    text: " + r.text
         if(status != "ERROR"):
             if(contentData["size"] > 0):
-                content = contentData["elements"]["content"].encode("utf-8")
-                json_sender_data, json_recipients_data, json_subject_data, json_body_data = translateMailData(content)
-                r = requests.post(url_base + 'put?queue=recipientOut', json_recipients_data)
-                r = requests.post(url_base + 'put?queue=subjectOut', json_subject_data)
-                r = requests.post(url_base + 'put?queue=mailDataOut', json_body_data)
-                #r.text
+                try:
+                    content = contentData["element"]["content"].encode("utf-8")
+                    json_sender_data, json_recipients_data, json_subject_data, json_body_data = translateMailData(content)
+                    r = requests.post(url_base + 'put?queue=recipientOut', json= json.dumps(json_recipients_data))
+                    r = requests.post(url_base + 'put?queue=subjectOut', json= json.dumps(json_subject_data))
+                    r = requests.post(url_base + 'put?queue=mailDataOut', json= json.dumps(json_body_data))
+                    #r.text
+                except Exception, err:
+                    r = requests.post(url_base + 'put?queue=error', json=json.dumps(contentData))
+                    print "    # Error: # " + '%sn' % str(err)
+                    print "    Se agrego contenido del mensaje a la cola error."
         else:
             print "    Error: " + contentData["method"].encode("utf-8") + contentData["msg"].encode("utf-8")
 
@@ -63,9 +72,15 @@ def translate(url_base='http://localhost:9090/'):
         print "    text: " + r.text
         if(status != "ERROR"):
             if(passwordData["size"] > 0):
-                password = passwordData["elements"]["content"].encode("utf-8")
-                json_password_data = translatePassword(password)
-                r = requests.post(url_base + 'put?queue=passwordOut', json_password_data)
+                try:
+                    password = passwordData["element"]["content"].encode("utf-8")
+                    json_password_data = translatePassword(password)
+                    r = requests.post(url_base + 'put?queue=passwordOut', json= json.dumps(json_password_data))
+                except Exception, err:
+                    r = requests.post(url_base + 'put?queue=error', json=json.dumps(passwordData))
+                    print "    # Error: # " + '%sn' % str(err)
+                    print "    Se agrego contenido del mensaje a la cola error."
+
         else:
             print "    Error: " + contentData["method"].encode("utf-8") + contentData["msg"].encode("utf-8")
 

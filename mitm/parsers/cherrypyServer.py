@@ -11,7 +11,7 @@ from cherrypy.lib.httputil import parse_query_string
 import random
 import string
 
-available_queues = ["mailIn", "mailOut", "password", "errors", "passwordOut", "recipientOut", "mailDataOut", "subjectOut"]
+available_queues = ["mailIn", "mailOut", "password", "temporal", "passwordOut", "recipientOut", "mailDataOut", "subjectOut", "error"]
 queues = {q: Queue.Queue() for q in available_queues}
 
 def error_page_404(status, message, traceback, version):
@@ -34,7 +34,9 @@ class HomeController():
         queue = str(query["queue"]) 
         
         if queue in available_queues:
+            temporalElement = msg
             queues[queue].put(msg)
+            queues["temporal"].put(msg)
             msgOut = {"status" : "OK", "method" : "put", "queue" : queue, "size" : queues[queue].qsize()}
         else:
             msgOut = {"status" : "ERROR", "method" : "put", "msg" : "Cola no existente."}
