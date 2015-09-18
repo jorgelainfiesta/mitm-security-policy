@@ -1,36 +1,36 @@
-CREATE TABLE "mail" (
-    "id_mail" serial NOT NULL PRIMARY KEY,
-    "sender" varchar(30) NOT NULL,
-    "body" varchar(3000) NOT NULL,
-    "recipient" varchar(50) NOT NULL references recipient(id_recipient),
-    "tag" varchar(50) NOT NULL references tag(id_tag), 
+CREATE TABLE  mail (
+    id_mail INTEGER PRIMARY KEY NOT NULL,
+    sender VARCHAR(30) NOT NULL,
+    body TEXT NOT NULL,
+    recipients TEXT [] NOT NULL references recipient(id_recipient),
+    tags TEXT[] NOT NULL references tag(id_tag), 
 );
 
 
-CREATE TABLE "tag" (
-    "id_tag" serial NOT NULL PRIMARY KEY,
-    "key" varchar(200) NOT NULL,
-    "value" varchar(200) NOT NULL
+CREATE TABLE tag (
+   	id_tag INTEGER PRIMARY KEY NOT NULL,
+    key  VARCHAR(200) NOT NULL,
+    value VARCHAR(200) NOT NULL
 );
 
-CREATE TABLE "recipient" (
-    "id_recipient" serial NOT NULL PRIMARY KEY,
-    "mail" varchar(30) NOT NULL,
-    "tag" varchar(50) NOT NULL references tag(id_tag), 
+CREATE TABLE recipient (
+    id_recipient INTEGER PRIMARY KEY NOT NULL,
+    mail TEXT  NOT NULL,
+    tags TEXT[] NOT NULL references tag(id_tag), 
 );
 
-CREATE TABLE "password" (
-    "password_id" serial NOT NULL PRIMARY KEY,
-    "mail" varchar(30) NOT NULL,
-    "password" varchar(50) NOT NULL,
-     "tag" varchar(50) NOT NULL references tag(id_tag), 
+CREATE TABLE password (
+    password_id INTEGER PRIMARY KEY NOT NULL,
+    mail VARCHAR(30) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    tags TEXT[] NOT NULL references tag(id_tag),  
 );
 
-CREATE TABLE "status" (
-    "status_id" serial NOT NULL PRIMARY KEY,
-    "key" varchar(30) NOT NULL,
-    "value" varchar(50) NOT NULL,
-    "tag" varchar(50) NOT NULL references tag(id_tag),
+CREATE TABLE status (
+    status_id INTEGER PRIMARY KEY NOT NULL,
+    key varchar(30) NOT NULL,
+    value varchar(50) NOT NULL,
+    tag varchar(30) NOT NULL references tag(id_tag),
 );
 
 CREATE FUNCTION check_password(uname TEXT, pass TEXT)
