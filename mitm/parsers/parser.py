@@ -22,11 +22,13 @@ class Parser(object):
 
         # Subject
         subject = re.compile('\"(.*?)<p dir=\"ltr\">', re.DOTALL |  re.IGNORECASE).findall(content)
-        subject = subject[0].replace(r'\u0000*\u00002', '')[6:-7]
+        #subject = subject[0].replace(r'\u0000*\u00002', '')[6:-7]
+        subject = subject[0].replace(r'\u0000*\u00002', '')[6:]
+        subject = subject.split(":")[0]
 
         # Recipients
         recipientsList = re.findall('<.*?>\"',content)
-        rL = recipientsList[0][1:]
+        rL = recipientsList[0]#[1:]
         recipients = []
         recipientsList = re.findall('<.*?>',rL)
         for element in recipientsList:
