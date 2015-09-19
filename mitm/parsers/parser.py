@@ -1,5 +1,6 @@
 import re
 import json
+import urllib
 
 class Parser(object):
 
@@ -15,47 +16,35 @@ class Parser(object):
     #                 body : [string]        Cuerpo del correo.
     #          error : [json]           Mensaje de error
     def contentParser(self, content):
-        #print content
-        # Sender
-        senderTemp = content.split('</p>')
-        bodyTemp = senderTemp
-        sender = senderTemp[len(senderTemp)-1].split('$', 1)
-        sender = sender[0]
-        sender = re.sub(r'[^\x20-\x7e]','*', sender)
-        sender = sender.split('*')
-        sender = sender[len(sender)-1]
-
         # Body
-        body = bodyTemp[0].split('<p dir=ltr>')
-        headerTemp = body[0]
-        body = body[len(body)-1]
+        body = re.findall('<p dir=\"ltr\">.*?</p>',content)
+        body = body[0].replace('<p dir=\"ltr\">', '').replace('</p>', '')
 
         # Subject
-        headerTemp2 = headerTemp
-        subjectTemp = headerTemp.split('"\u0000*\u00002\u0006')
-        subject = subjectTemp[len(subjectTemp)-1]
-        subject = re.sub(r'[:\\u0017]','', subject)
-        #print subject
-        #print headerTemp
+        subject = re.compile('\"(.*?)<p dir=\"ltr\">', re.DOTALL |  re.IGNORECASE).findall(content)
+        subject = subject[0].replace(r'\u0000*\u00002', '')[6:-7]
 
         # Recipients
-        recipientsList = re.findall('<.*?>',headerTemp2)
+        recipientsList = re.findall('<.*?>\"',content)
+        rL = recipientsList[0][1:]
         recipients = []
+        recipientsList = re.findall('<.*?>',rL)
         for element in recipientsList:
             element = element.replace("<", "")
             element = element.replace(">", "")
             recipients.append(element)
 
-        return sender , recipients, subject, body
+        return recipients, subject, body
 
     def passwordParser(self, content):
         return "NotImplemented"
 
 #content = '\x08\xed\x9c\x8e)#\x08\x00\x10/\x18\x01(\x000\x018\x03@\x01H\x01P\x01X\x00`\x05p\x01x\x01\x01\x01$;\x0b\x08\x02#\x08\x14\x10\x00\x1a\x1c<nnmorales@gmail.com>\x08\x14\x10\x00\x1a\x1c<jorge.lainfiesta@gmail.com>"\x00*\x002\x06Aaaaaa:\x17<p dir=ltr>Holaaaa</p>\nP\x00X\x00p\x01z\x15neryalecorp@gmail.com$\x0c\x10\x02<K\x08\x01\x10\x01\x18\x00 \x01(\x010\x01:\x05en_US@\x04LP\x02'
+#content = "\\b\\ud70e)#\\b\\u0000\\u00109\\u0018\\u0001(\\u00070\\u00018\\u0003@\\u0001H\\u0001P\\u0001X\\u0000`\\u0005p\\u0001x\\u0001\\u0001\\u0000$;\\u000b\\b\\u0003;\\n\\blabel:^f\\u00109<\\f\\u000b\\b\\u0003#\\b\\u0014\\u0010\\u0000\\u001a3<jorge.lainfiesta@gmail.com>, <lai11142@uvg.edu.gt>\"\\u0000*\\u00002\\u0012Dos destinatarios :\\u001c<p dir=\"ltr\">Hola aaaaa</p>\\nP\\u0000X\\u0000p\\u0001z\\u0015neryalecorp@gmail.com$\\f\\u0010\\u0003<K\\b\\u0001\\u0010\\u0001\\u0018\\u0000 \\u0001(\\u00010\\u0001:\\u0005en_US@\\u0004LP\\u0002"
 #parser = Parser()
-#sender , recipients, subject, body = parser.contentParser(content)
+#recipients, subject, body = parser.contentParser(content)
 
-#print sender
+#print ""
 #print recipients
 #print subject
 #print body

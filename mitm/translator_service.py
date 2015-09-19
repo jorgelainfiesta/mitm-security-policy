@@ -3,15 +3,17 @@ import parsers.parser as prs
 import json
 import sys
 
+
+import ast
 #url_base = 'https://mitmendpoint.herokuapp.com/'
 #url_base = 'https://localhost:9090/'
 
 def translateMailData(content):
     p = prs.Parser()
-    sender , recipients, subject, body = p.contentParser(content)
+    recipients, subject, body = p.contentParser(content)
 
-    sender_data = {"status" : "OK", "method" : "getSenderItem", "sender" : sender}
-    json_sender_data = json.dumps(sender_data)
+    #sender_data = {"status" : "OK", "method" : "getSenderItem", "sender" : sender}
+    #json_sender_data = json.dumps(sender_data)
 
     nested_list = dict()
 
@@ -28,7 +30,7 @@ def translateMailData(content):
     body_data = {"status" : "OK", "method" : "getMailBodyItem", "body" : body}
     json_body_data = json.dumps(body_data)
 
-    return json_sender_data, json_recipients_data, json_subject_data, json_body_data
+    return json_recipients_data, json_subject_data, json_body_data
 
 def translatePassword(content):
     p = prs.Parser()
@@ -46,23 +48,29 @@ def translate(url_base='http://localhost:9090/'):
         
         #Consultar cola mailOut
         r = requests.get(url_base + 'get?queue=mailOut')
-        contentData = eval(r.text)
+        contentData = json.loads(r.text.encode("utf-8"))
         status = contentData["status"]
+        
+
         print "..."
         if(status != "ERROR"):
             if(contentData["size"] > 0):
-                try:
+                #try:
                     print "...Parseando mensaje de correo electronico..."
-                    content = contentData["element"]["content"].encode("utf-8")
-                    json_sender_data, json_recipients_data, json_subject_data, json_body_data = translateMailData(content)
+                    c = contentData["element"]
+                    content = ast.literal_eval(c)
+                    print content
+                    content = content["content"].encode("utf-8")
+                    #break
+                    json_recipients_data, json_subject_data, json_body_data = translateMailData(content)
                     r = requests.post(url_base + 'put?queue=recipientOut', json= json.dumps(json_recipients_data))
                     r = requests.post(url_base + 'put?queue=subjectOut', json= json.dumps(json_subject_data))
                     r = requests.post(url_base + 'put?queue=mailDataOut', json= json.dumps(json_body_data))
                     #r.text
-                except Exception, err:
-                    r = requests.post(url_base + 'put?queue=error', json=json.dumps(contentData))
-                    print "    # Error: # " + '%sn' % str(err)
-                    print "    Se agrego contenido del mensaje a la cola error."
+                #except Exception, err:
+                #    r = requests.post(url_base + 'put?queue=error', json=json.dumps(contentData))
+                #    print "    # Error: # " + '%sn' % str(err)
+                #    print "    Se agrego contenido del mensaje a la cola error."
         else:
             print "    Error: " + contentData["method"].encode("utf-8") + contentData["msg"].encode("utf-8")
 
@@ -74,7 +82,7 @@ def translate(url_base='http://localhost:9090/'):
         if(status != "ERROR"):
             if(passwordData["size"] > 0):
                 try:
-                    print "...Parseando mensaje con contraseña..."
+                    print "...Parseando mensaje con contraseniaa..."
                     password = passwordData["element"]["content"].encode("utf-8")
                     json_password_data = translatePassword(password)
                     r = requests.post(url_base + 'put?queue=passwordOut', json= json.dumps(json_password_data))
