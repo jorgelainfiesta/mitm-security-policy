@@ -1,16 +1,22 @@
-<h2>Este correo contiene info privada</h2>
+<h2>{{model.subject}}</h2>
   <dl class="meta-mail">
-      <dt>Enviado por:</dt>
-      <dd>neryalecorp@gmail.com</dd>
-      <dt>Destinatarios:</dt>
+      <dt>Sent by:</dt>
+      <dd>{{model.sender}}</dd>
+      <dt>Recipients:</dt>
       <dd>
           <ul>
-              <li>ben@nasa.gov</li>
+              {{#each model.recipients as |recipient|}}
+                  <li>
+                      {{recipient.address}}
+                  </li>
+              {{/each}}
           </ul>
       </dd>
+      <dt>Date sent:</dt>
+      <dd>{{moment-format model.datetime}}</dd>
   </dl>
+  
   {{paper-divider}}
   <p>
-    The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-    two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
+      {{html-safe model.body}}
   </p>
