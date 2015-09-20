@@ -1,0 +1,48 @@
+.menus ul {
+  padding: 0;
+  margin: 0;
+}
+.menu-card {
+  display: block;
+  margin: 1rem 0;
+
+  h3 {
+    text-transform: uppercase;
+    color: color($primary, '500');
+    margin: 15px 0;
+  }
+  .edit-menu {
+    float: right;
+  }
+  strong {
+    display: block;
+    font-weight: normal;
+  }
+  &.past-menu {
+    box-sizing: border-box;
+    padding-right: 0.5rem;
+    h3 {
+      color: color($primary, '300');
+    }
+  }
+  &.week-start {
+    clear: both;
+  }
+  @include breakpoint(tablet) {
+    width: 33%;
+    float: left;
+    @for $i from 1 to 5{
+      .first-#{$i} {
+        margin-left: ($i - 1) * 20%;
+      }
+    }
+  }
+//  @include breakpoint(laptop) {
+//    width: 20%;
+//    @for $i from 1 to 5{
+//      .first-#{$i} {
+//        margin-left: ($i - 1) * 20%;
+//      }
+//    }
+//  }
+}

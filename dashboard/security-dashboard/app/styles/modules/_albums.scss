@@ -1,0 +1,41 @@
+.album-thumb {
+  width: 150px;
+  margin-right: 1rem;
+  text-align: center;
+  img {
+    max-width: 100%;
+  }
+}
+.photo-list {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+}
+.photo-card {
+  text-align: center;
+  
+  @include breakpoint(tablet) {
+    width: 45%;
+  }
+  @include breakpoint(laptop) {
+    width: 30%;
+  }
+  .delete-button {
+    float: right;
+  }
+  .paper-switch  {
+    float: left;
+  }
+  &.upload-form {
+    text-align: center;
+    border: 1px solid color($accent, '500');
+    padding: 1rem;
+    .ember-text-field  { 
+      cursor: pointer;
+      padding: 2rem 1rem;
+    }
+    h3 {
+      color: color($accent, '300');
+    }
+  }
+}

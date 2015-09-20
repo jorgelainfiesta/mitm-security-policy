@@ -6,6 +6,9 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
+  this.route('mails', function() {
+    this.route('mail');
+  });
 });
 
 export default Router;

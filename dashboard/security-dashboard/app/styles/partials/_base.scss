@@ -1,0 +1,37 @@
+//Edit in color-pallete.scss
+
+//line 24: Add valsta-color
+//$color-valsta: (
+//  '50': #e4f9f2,
+//  '100': #d6f2e7,
+//  '200': #bae8d4,
+//  '300': #9dd6bc,
+//  '400': #86ceaa,
+//  '500': #00ac7d,
+//  '600': #00a06e,
+//  '700': #05936e,
+//  '800': #04845f,
+//  '900': #036d4c,
+//  'A100': #b4e5aa,
+//  'A200': #98e286,
+//  'A400': #74d359,
+//  'A700': #69e541,
+//  'contrast': $light-contrast-color
+//);
+
+//line 443: register valsta color
+//$colors: (
+//  'valsta': $color-valsta,
+
+//Override paper styles
+$primary:  "blue-grey";
+$accent: "light-green";
+$side: "grey";
+
+@import 'ember-paper';
+
+$content-width: 860px;
+//Import other partials
+@import 'mixins';
+
+$radius-size: 4px;

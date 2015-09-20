@@ -1,3 +1,30 @@
-<h2 id="title">Welcome to Ember</h2>
+<div id="paper-wormhole"></div>
+{{#paper-toolbar class="site-content-toolbar"}}
+      <div class="md-toolbar-tools">
+        {{#paper-sidenav class="md-sidenav-left header-logo" locked-open="gt-sm"}}
+            <div class="logo">
+              {{#link-to 'index'}}
+                 <strong>Security Policies</strong>
+              {{/link-to}}
+            </div>
+        {{/paper-sidenav}}
+        {{#paper-button}}
+            {{paper-icon icon="email"}} Emails
+        {{/paper-button}}
+        {{#paper-button}}
+            {{paper-icon icon="contacts"}} Contacts
+        {{/paper-button}}
+      </div>
+           
+{{/paper-toolbar}}
+    
+{{#paper-nav-container class="ember-app site-nav-container"}}
+    
+  {{filter-panel transitionTo=(action "transitionTo") mail=true}}
+  
 
-{{outlet}}
+  {{#paper-content flex-layout="row" flex=true class="app-main"}}
+      {{outlet}}
+  {{/paper-content}}
+
+{{/paper-nav-container}}

@@ -1,0 +1,32 @@
+{{#paper-list flex="10" class="content-list"}}
+       {{#paper-item class="md-3-line"}}
+        <div class="md-list-item-text">
+         <span class="date">
+             Hace 10 minutos
+         </span>
+          <h3>
+              Este correo contiene info privada
+          </h3>
+          <h4>Enviado por <strong>neryalecorp@gmail.com</strong></h4>
+        </div>
+      {{/paper-item}}
+      {{paper-divider}}
+    {{#each listData as |item|}}
+      {{#paper-item class="md-3-line"}}
+        <img src={{item.face}} alt={{item.who}} class="md-avatar">
+        <div class="md-list-item-text">
+          <h3>{{item.what}}</h3>
+          <h4>{{item.who}}</h4>
+          <p>
+            {{item.notes}}
+          </p>
+        </div>
+      {{/paper-item}}
+    {{/each}}
+  {{/paper-list}}
+   
+  {{#paper-card flex="15"}}
+    {{#paper-card-content}}
+      {{outlet}}
+    {{/paper-card-content}}
+  {{/paper-card}}

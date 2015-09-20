@@ -1,0 +1,10 @@
+{{#if mail}}
+    <h2>
+        {{paper-icon icon="mail"}}
+    Mails
+    </h2>
+{{/if}}
+{{#paper-list}}
+        {{#paper-item action=(action "transitionTo" "dashboard.activities")}}Filtros...{{/paper-item}}
+        {{paper-divider}}
+  {{/paper-list}}
