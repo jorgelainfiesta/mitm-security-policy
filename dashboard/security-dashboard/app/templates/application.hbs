@@ -8,10 +8,10 @@
               {{/link-to}}
             </div>
         {{/paper-sidenav}}
-        {{#paper-button}}
+        {{#paper-button action=(action 'transitionTo' 'mails')}}
             {{paper-icon icon="email"}} Emails
         {{/paper-button}}
-        {{#paper-button}}
+        {{#paper-button action=(action 'transitionTo' 'recipients')}}
             {{paper-icon icon="contacts"}} Contacts
         {{/paper-button}}
       </div>

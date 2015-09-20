@@ -7,7 +7,7 @@ var Router = Ember.Router.extend({
 
 Router.map(function() {
   this.route('mails', function() {
-    this.route('mail');
+    this.route('mail', {path: "/:mail_id"});
   });
 });
 

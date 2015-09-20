@@ -70,6 +70,10 @@ md-toolbar.site-content-toolbar {
     color: #6B6B6B;
     font-size: 14px;
   }
+  md-list-item > button > span {
+    display: block;
+    width: 100%;
+  }
 }
 .app-main {
 //  md-toolbar.page-toolbar {
