@@ -7,7 +7,9 @@
           <ul>
               {{#each model.recipients as |recipient|}}
                   <li>
-                      {{recipient.address}}
+                      {{#link-to 'recipients.recipient' recipient.id}}
+                          {{recipient.address}}
+                      {{/link-to}}
                   </li>
               {{/each}}
           </ul>
@@ -20,3 +22,12 @@
   <p>
       {{html-safe model.body}}
   </p>
+  {{paper-divider}}
+ <div class="tags">
+  <strong>TAGS:</strong>
+  {{#each model.tags as |tag|}}
+      <span class="tag">
+          {{tag.description}}
+      </span>
+  {{/each}}
+</div>

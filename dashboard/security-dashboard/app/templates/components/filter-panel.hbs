@@ -1,10 +1,7 @@
-{{#if mail}}
-    <h2>
-        {{paper-icon icon="mail"}}
-    Mails
-    </h2>
-{{/if}}
+{{yield}}
 {{#paper-list}}
-        {{#paper-item action=(action "transitionTo" "dashboard.activities")}}Filtros...{{/paper-item}}
+    {{#each tags as |tag|}}
         {{paper-divider}}
-  {{/paper-list}}
+        {{#paper-radio value=tag.id selected=selectedValue}} {{tag.description}} {{/paper-radio}}
+    {{/each}}
+{{/paper-list}}

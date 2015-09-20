@@ -12,7 +12,7 @@
             {{paper-icon icon="email"}} Emails
         {{/paper-button}}
         {{#paper-button action=(action 'transitionTo' 'recipients')}}
-            {{paper-icon icon="contacts"}} Contacts
+            {{paper-icon icon="contacts"}} Recipients
         {{/paper-button}}
       </div>
            
@@ -20,11 +20,6 @@
     
 {{#paper-nav-container class="ember-app site-nav-container"}}
     
-  {{filter-panel transitionTo=(action "transitionTo") mail=true}}
+    {{outlet}}
   
-
-  {{#paper-content flex-layout="row" flex=true class="app-main"}}
-      {{outlet}}
-  {{/paper-content}}
-
 {{/paper-nav-container}}

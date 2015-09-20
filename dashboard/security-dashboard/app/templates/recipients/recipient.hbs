@@ -1,0 +1,21 @@
+<h2>{{model.address}}</h2>
+<dl class="meta-mail">
+  <dt>Email recived:</dt>
+  <dd>
+      {{#link-to 'mails.mail' model.id}}
+          {{model.email.subject}}
+      {{/link-to}}
+  </dd>
+</dl>
+
+{{paper-divider}}
+
+
+<div class="tags">
+  <strong>TAGS:</strong>
+  {{#each model.tags as |tag|}}
+      <span class="tag">
+          {{tag.description}}
+      </span>
+  {{/each}}
+</div>

@@ -1,27 +1,24 @@
 {{#filter-panel filter=(action "filter") tags=model.tags}}
     <h2>
-        {{paper-icon icon="mail"}}
-        Mails
+        {{paper-icon icon="contacts"}}
+        Recipients
     </h2>
 {{/filter-panel}}
 
 {{#paper-content flex-layout="row" flex=true class="app-main"}}
     {{#paper-list flex="10" class="content-list"}}
-        {{#each model.mails as |mail|}}
+        {{#each model.recipients as |recipient|}}
 
-          {{#paper-item class="md-3-line" action=(action 'toMail' mail.id)}}
+          {{#paper-item class="md-3-line" action=(action 'toRecipient' recipient.id)}}
             <div class="md-list-item-text">
-             <span class="date">
-                 {{moment-from-now mail.datetime}}
-             </span>
               <h3>
-                  {{mail.subject}}
+                  {{recipient.address}}
               </h3>
-              <h4>Sent by <strong>{{mail.sender}}</strong></h4>
             </div>
           {{/paper-item}}
           {{paper-divider}}
         {{/each}}
+        
     {{/paper-list}}
    
   {{#paper-card flex="15"}}
