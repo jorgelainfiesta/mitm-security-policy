@@ -7,6 +7,9 @@
 
 {{#paper-content flex-layout="row" flex=true class="app-main"}}
     {{#paper-list flex="10" class="content-list"}}
+       {{#if loading}}
+            {{paper-progress-circular class="md-hue-2"}}
+       {{else}}
         {{#each model.recipients as |recipient|}}
 
           {{#paper-item class="md-3-line" action=(action 'toRecipient' recipient.id)}}
@@ -17,7 +20,14 @@
             </div>
           {{/paper-item}}
           {{paper-divider}}
+        {{else}}
+            {{#paper-item class="md-3-line"}}
+                <div class="md-list-item-text">
+                  <h3>No recipients match criteria.</h3>
+                </div>
+           {{/paper-item}}
         {{/each}}
+        {{/if}}
         
     {{/paper-list}}
    

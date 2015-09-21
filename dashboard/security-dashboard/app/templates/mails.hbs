@@ -6,23 +6,36 @@
 {{/filter-panel}}
 
 {{#paper-content flex-layout="row" flex=true class="app-main"}}
+    
     {{#paper-list flex="10" class="content-list"}}
-        {{#each model.mails as |mail|}}
+        {{#if loading}}
+            {{paper-progress-circular class="md-hue-2"}}
+        {{else}}
+            {{#each model.mails as |mail|}}
 
-          {{#paper-item class="md-3-line" action=(action 'toMail' mail.id)}}
-            <div class="md-list-item-text">
-             <span class="date">
-                 {{moment-from-now mail.datetime}}
-             </span>
-              <h3>
-                  {{mail.subject}}
-              </h3>
-              <h4>Sent by <strong>{{mail.sender}}</strong></h4>
-            </div>
-          {{/paper-item}}
-          {{paper-divider}}
-        {{/each}}
+              {{#paper-item class="md-3-line" action=(action 'toMail' mail.id)}}
+                <div class="md-list-item-text">
+                 <span class="date">
+                     {{moment-from-now mail.datetime}}
+                 </span>
+                  <h3>
+                      {{mail.subject}}
+                  </h3>
+                  <h4>Sent by <strong>{{mail.sender}}</strong></h4>
+                </div>
+              {{/paper-item}}
+              {{paper-divider}}
+            {{else}}
+                {{#paper-item class="md-3-line"}}
+                <div class="md-list-item-text">
+                  <h3>No mails match criteria.</h3>
+                </div>
+               {{/paper-item}}
+            {{/each}}
+        {{/if}}
+        
     {{/paper-list}}
+    
    
   {{#paper-card flex="15"}}
     {{#paper-card-content}}
