@@ -48,7 +48,14 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-
+    ENV.apiUrl = "http://mitm-api.herokuapp.com";
+    
+    ENV.contentSecurityPolicy = {
+      'connect-src' : "'self' mitm-api.herokuapp.com",
+      'font-src': "'self' fonts.gstatic.com",
+      'style-src': "'self' 'unsafe-inline' fonts.googleapis.com",
+      'img-src': "'self' data:"
+    }
   }
 
   return ENV;
